@@ -4,8 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
-    "postinstall": "prisma generate"
+    "build": "next build"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.864.0",
