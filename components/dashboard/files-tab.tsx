@@ -4,7 +4,6 @@ import { useEffect, useState } from "react"
 import { Button } from "../../components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card"
 import { Trash2, Download, Loader2 } from "lucide-react"
-import { auth } from "@clerk/nextjs/server"
 
 type FileItem = {
   id: string
@@ -47,24 +46,24 @@ export function FilesTab() {
   }
 
   const handlePop = async (fileId: string) => {
-    try {
-      const res = await fetch("/api/spitout", { method: "POST" })
-      if (!res.ok) throw new Error("Failed to pop file from queue")
+  try {
+    const res = await fetch("/api/spitout", { method: "POST" })
+    if (!res.ok) throw new Error("Failed to pop file from queue")
 
-      // Optimistic update
-      setFiles((prev) =>
-        prev.map((f) =>
-          f.id === fileId ? { ...f, status: "removed" } : f
-        )
+    // Optimistic update
+    setFiles((prev) =>
+      prev.map((f) =>
+        f.id === fileId ? { ...f, status: "removed" } : f
       )
-    } catch (err) {
-      console.error(err)
-      alert("Error popping file from queue")
-    }
+    )
+  } catch (err) {
+    console.error(err)
+    alert("Error popping file from queue")
   }
+}
 
   return (
-    <div className="grid gap-4">
+    <div className="grid gap-4 text-white font-white">
       {loading && (
         <div className="flex items-center justify-center">
           <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
@@ -80,15 +79,14 @@ export function FilesTab() {
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-lg font-medium">{file.name}</CardTitle>
             <span
-              className={`px-2 py-1 rounded text-xs ${
-                file.status === "processed"
+              className={`px-2 py-1 rounded text-xs ${file.status === "processed"
                   ? "bg-green-100 text-green-700"
                   : file.status === "processing"
-                  ? "bg-yellow-100 text-yellow-700"
-                  : file.status === "failed"
-                  ? "bg-red-100 text-red-700"
-                  : "bg-gray-100 text-gray-600"
-              }`}
+                    ? "bg-yellow-100 text-yellow-700"
+                    : file.status === "failed"
+                      ? "bg-red-100 text-red-700"
+                      : "bg-gray-100 text-gray-600"
+                }`}
             >
               {file.status}
             </span>
@@ -105,11 +103,7 @@ export function FilesTab() {
             )}
 
             {file.status === "processing" && (
-              <Button
-                size="sm"
-                variant="secondary"
-                onClick={() => handlePop(file.id)}
-              >
+              <Button size="sm" variant="secondary" onClick={() => handlePop(file.id)}>
                 Pop from Queue
               </Button>
             )}

@@ -10,7 +10,7 @@ export default async function worker() {
     // Pop one job from Redis queue
     const jobRaw = await redis.rpop("video_jobs");
     if (!jobRaw) {
-      console.log("⚠️ No job found in queue");
+      console.log("No job found in queue");
       return { success: false, message: "No job in queue" };
     }
 
@@ -37,12 +37,12 @@ export default async function worker() {
 
     fs.unlinkSync(outputFile);
 
-    console.log(`✅ Job done: ${newKey}`);
+    console.log(`Job done: ${newKey}`);
     console.log("File URL:", fileUrl);
 
     return { success: true, key: newKey, url: fileUrl, userId };
   } catch (error) {
-    console.error("❌ Worker error:", error);
+    console.error(" Worker error:", error);
     return { success: false, error: (error as Error).message };
   }
 }

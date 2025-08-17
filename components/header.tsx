@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Volume2 } from "lucide-react";
 import Link from "next/link";
@@ -7,11 +8,22 @@ import {
   SignedIn,
   SignedOut,
   SignInButton,
-  SignUpButton,
   UserButton,
+  useUser,
 } from "@clerk/nextjs";
 
 export function Header() {
+  const { user } = useUser();
+
+  useEffect(() => {
+    if (!user) return;
+
+    // Call your API to create the user in your database
+    fetch("/api/create-user", { method: "POST" }).catch((err) =>
+      console.error("Failed to create user in DB", err)
+    );
+  }, [user]);
+
   return (
     <header className="top-0 w-full bg-background/80 backdrop-blur-md border-b z-50">
       <div className="flex-1 mx-auto h-16 flex items-center justify-between">
@@ -41,8 +53,10 @@ export function Header() {
         <div className="flex items-center gap-2">
           {/* Show when NOT signed in */}
           <SignedOut>
-            <SignInButton mode="modal" fallbackRedirectUrl="/dashboard">
-              <Button variant="ghost">Sign in</Button>
+            {/* SignIn modal automatically allows sign-up as well */}
+            {/* @ts-ignore */}
+            <SignInButton mode="modal" afterSignInUrl="/dashboard">
+              <Button variant="ghost">Sign in / Sign up</Button>
             </SignInButton>
           </SignedOut>
 

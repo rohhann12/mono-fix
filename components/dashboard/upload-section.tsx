@@ -111,11 +111,10 @@ export function UploadSection() {
         <CardContent className="p-8">
           <div
             {...getRootProps()}
-            className={`border-2 border-dashed rounded-lg p-12 text-center cursor-pointer transition-colors ${
-              isDragActive
+            className={`border-2 border-dashed rounded-lg p-12 text-center cursor-pointer transition-colors ${isDragActive
                 ? "border-primary bg-primary/5"
                 : "border-muted-foreground/25 hover:border-primary/50"
-            }`}
+              }`}
           >
             <input {...getInputProps()} />
             <Upload className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
@@ -155,6 +154,32 @@ export function UploadSection() {
                     <div className="mt-2">
                       <div className="flex items-center justify-between text-sm mb-1">
                         <span className="capitalize text-muted-foreground">
+                          <div className="flex items-center gap-2">
+                            {uploadedFile.status === "error" && (
+                              <AlertCircle className="w-5 h-5 text-red-500" />
+                            )}
+
+                            {uploadedFile.status === "completed" ? (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                asChild
+                              >
+                                <a href={uploadedFile.downloadUrl} download>
+                                  Download
+                                </a>
+                              </Button>
+                            ) : (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => removeFile(uploadedFile.id)}
+                              >
+                                <X className="w-4 h-4" />
+                              </Button>
+                            )}
+                          </div>
+
                           {uploadedFile.status === "uploading" && "Uploading..."}
                           {uploadedFile.status === "processing" &&
                             "Converting to stereo..."}
@@ -170,16 +195,6 @@ export function UploadSection() {
                   </div>
 
                   <div className="flex items-center gap-2">
-                    {uploadedFile.status === "completed" && (
-                      <>
-                        <CheckCircle className="w-5 h-5 text-green-500" />
-                        <Button size="sm" asChild>
-                          <a href={uploadedFile.downloadUrl} download>
-                            Download
-                          </a>
-                        </Button>
-                      </>
-                    )}
                     {uploadedFile.status === "error" && (
                       <AlertCircle className="w-5 h-5 text-red-500" />
                     )}

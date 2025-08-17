@@ -1,6 +1,5 @@
 import { HeroSection } from "../components/hero-section"
 import { DashboardPreview } from "../components/dashboard-preview"
-import { FAQSection } from "../components/faq-section"
 import { CTASection } from "../components/cta-section"
 import { FooterSection } from "../components/footer-section"
 import { AnimatedSection } from "../components/animated-section"
@@ -15,16 +14,12 @@ export default function LandingPage() {
           <HeroSection />
           <FeaturesSection />
           <HowItWorksSection />
-          {/* Dashboard Preview Wrapper */}
           <div className="flex flex-1 items-center justify-center">
             <AnimatedSection>
               <DashboardPreview />
             </AnimatedSection>
           </div>
         </main>
-        <AnimatedSection id="faq-section" className="relative z-10 max-w-[1320px] mx-auto mt-8 md:mt-16" delay={0.2}>
-          <FAQSection />
-        </AnimatedSection>
         <AnimatedSection className="relative z-10 max-w-[1320px] mx-auto mt-8 md:mt-16" delay={0.2}>
           <CTASection />
         </AnimatedSection>

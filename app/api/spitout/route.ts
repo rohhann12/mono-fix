@@ -18,7 +18,6 @@ export async function POST(req: NextRequest) {
       await prisma.video.create({
         data: {
           url: result.url,
-          key: result.key,
           userId,
         },
       })
