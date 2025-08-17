@@ -8,11 +8,11 @@ import { redis } from "@/lib/redis";
 export async function POST(req: NextRequest) {
   try {
     // Clerk auth
-    // const { userId } =await auth();
-    // if (!userId) {
-    //   return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    // }
-    const userId=Math.random().toString().substring(2,5)
+    const { userId } =await auth();
+    if (!userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    // const userId=Math.random().toString().substring(2,5)
     const formData = await req.formData();
     const file = formData.get("file") as File;
 
@@ -46,10 +46,9 @@ export async function POST(req: NextRequest) {
         uploadedAt: Date.now(),
       })
     );
-
+    
     return NextResponse.json({
       success: true,
-      url: fileUrl,
     });
   } catch (err) {
     console.error(err);
