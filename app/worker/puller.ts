@@ -7,7 +7,7 @@ import PutObject from "../utils/reupload";
 
 export default async function worker() {
   try {
-    // Pop one job from the queue
+    // Pop one job from Redis queue
     const jobRaw = await redis.rpop("video_jobs");
     if (!jobRaw) {
       console.log("⚠️ No job found in queue");
@@ -19,7 +19,7 @@ export default async function worker() {
 
     console.log("Processing job:", job);
 
-    //  fetch from R2
+    // Fetch from R2
     const command = new GetObjectCommand({
       Bucket: process.env.R2_BUCKET_NAME!,
       Key: key,
@@ -28,18 +28,21 @@ export default async function worker() {
     const result = await r2.send(command);
     const stream = result.Body as any;
 
-    // ffmpeg convert mono → stereo
+    // Convert mono to stereo with ffmpeg
     const outputFile = await ConvertMono(stream, userId);
 
+    // Upload the processed file back to R2
     const newKey = `transcoding/${userId}/${Date.now()}.mp4`;
-    await PutObject(newKey, outputFile);
+    const fileUrl = await PutObject(newKey, outputFile);
 
-    fs.unlinkSync(outputFile); // cleanup
-    console.log(` Job done: ${newKey}`);
+    fs.unlinkSync(outputFile);
 
-    return { success: true, key: newKey };
+    console.log(`✅ Job done: ${newKey}`);
+    console.log("File URL:", fileUrl);
+
+    return { success: true, key: newKey, url: fileUrl, userId };
   } catch (error) {
-    console.error("Worker error:", error);
+    console.error("❌ Worker error:", error);
     return { success: false, error: (error as Error).message };
   }
 }

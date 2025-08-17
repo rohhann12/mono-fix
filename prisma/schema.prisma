@@ -13,3 +13,18 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model User {
+  id     String  @id @default(cuid())
+  name   String  @unique
+  count  Int     @default(0)
+  videos Video[]
+}
+
+model Video {
+  id        String @id @default(cuid())
+  url       String
+  uploadedAt DateTime @default(now())
+  userId    String
+  user      User @relation(fields: [userId], references: [id])
+}
