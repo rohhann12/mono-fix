@@ -50,7 +50,6 @@ export async function POST(req: NextRequest) {
     const video = await prisma.video.create({
       data: {
         url: fileUrl,
-        key,
         user: {
           connectOrCreate: {
             where: { id: userId },
