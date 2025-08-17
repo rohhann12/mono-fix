@@ -19,74 +19,77 @@ export function UploadSection() {
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([])
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
-    const newFiles = acceptedFiles.map((file) => ({
-      id: Math.random().toString(36).substr(2, 9),
-      file,
-      status: "uploading" as const,
-      progress: 0,
-    }))
+    const newFiles = acceptedFiles.map((file) => {
+      const fileObj: UploadedFile = {
+        id: Math.random().toString(36).substr(2, 9),
+        file,
+        status: "uploading",
+        progress: 0,
+      }
+
+      // Immediately start upload
+      uploadFile(fileObj)
+      return fileObj
+    })
 
     setUploadedFiles((prev) => [...prev, ...newFiles])
-
-    // Simulate upload and processing
-    newFiles.forEach((uploadedFile) => {
-      simulateProcessing(uploadedFile.id)
-    })
   }, [])
 
-  const simulateProcessing = (fileId: string) => {
-    // Simulate upload progress
-    const uploadInterval = setInterval(() => {
-      setUploadedFiles((prev) =>
-        prev.map((file) => {
-          if (file.id === fileId && file.status === "uploading") {
-            const newProgress = Math.min(file.progress + 10, 100)
-            if (newProgress === 100) {
-              clearInterval(uploadInterval)
-              setTimeout(() => {
-                setUploadedFiles((prev) =>
-                  prev.map((f) => (f.id === fileId ? { ...f, status: "processing", progress: 0 } : f)),
-                )
-                simulateAudioProcessing(fileId)
-              }, 500)
-            }
-            return { ...file, progress: newProgress }
-          }
-          return file
-        }),
-      )
-    }, 200)
-  }
+  const uploadFile = async (fileObj: UploadedFile) => {
+    try {
+      const formData = new FormData()
+      formData.append("file", fileObj.file)
 
-  const simulateAudioProcessing = (fileId: string) => {
-    const processingInterval = setInterval(() => {
+      const xhr = new XMLHttpRequest()
+      xhr.open("POST", "/api/upload")
+
+      xhr.upload.onprogress = (event) => {
+        if (event.lengthComputable) {
+          const progress = Math.round((event.loaded / event.total) * 100)
+          setUploadedFiles((prev) =>
+            prev.map((f) =>
+              f.id === fileObj.id ? { ...f, progress } : f
+            )
+          )
+        }
+      }
+
+      xhr.onload = () => {
+        if (xhr.status === 200) {
+          const response = JSON.parse(xhr.responseText)
+          setUploadedFiles((prev) =>
+            prev.map((f) =>
+              f.id === fileObj.id
+                ? { ...f, status: "completed", progress: 100, downloadUrl: response.url }
+                : f
+            )
+          )
+        } else {
+          setUploadedFiles((prev) =>
+            prev.map((f) =>
+              f.id === fileObj.id ? { ...f, status: "error" } : f
+            )
+          )
+        }
+      }
+
+      xhr.onerror = () => {
+        setUploadedFiles((prev) =>
+          prev.map((f) =>
+            f.id === fileObj.id ? { ...f, status: "error" } : f
+          )
+        )
+      }
+
+      xhr.send(formData)
+    } catch (error) {
+      console.error("Upload failed", error)
       setUploadedFiles((prev) =>
-        prev.map((file) => {
-          if (file.id === fileId && file.status === "processing") {
-            const newProgress = Math.min(file.progress + 15, 100)
-            if (newProgress === 100) {
-              clearInterval(processingInterval)
-              setTimeout(() => {
-                setUploadedFiles((prev) =>
-                  prev.map((f) =>
-                    f.id === fileId
-                      ? {
-                          ...f,
-                          status: "completed",
-                          progress: 100,
-                          downloadUrl: "#",
-                        }
-                      : f,
-                  ),
-                )
-              }, 500)
-            }
-            return { ...file, progress: newProgress }
-          }
-          return file
-        }),
+        prev.map((f) =>
+          f.id === fileObj.id ? { ...f, status: "error" } : f
+        )
       )
-    }, 300)
+    }
   }
 
   const removeFile = (fileId: string) => {
@@ -109,7 +112,9 @@ export function UploadSection() {
           <div
             {...getRootProps()}
             className={`border-2 border-dashed rounded-lg p-12 text-center cursor-pointer transition-colors ${
-              isDragActive ? "border-primary bg-primary/5" : "border-muted-foreground/25 hover:border-primary/50"
+              isDragActive
+                ? "border-primary bg-primary/5"
+                : "border-muted-foreground/25 hover:border-primary/50"
             }`}
           >
             <input {...getInputProps()} />
@@ -117,8 +122,12 @@ export function UploadSection() {
             <h3 className="text-lg font-semibold mb-2">
               {isDragActive ? "Drop files here" : "Upload your audio or video files"}
             </h3>
-            <p className="text-muted-foreground mb-4">Drag and drop files here, or click to browse</p>
-            <p className="text-sm text-muted-foreground">Supports MP3, WAV, MP4, AVI, MOV (up to 500MB)</p>
+            <p className="text-muted-foreground mb-4">
+              Drag and drop files here, or click to browse
+            </p>
+            <p className="text-sm text-muted-foreground">
+              Supports MP3, WAV, MP4, AVI, MOV (up to 500MB)
+            </p>
           </div>
         </CardContent>
       </Card>
@@ -129,11 +138,16 @@ export function UploadSection() {
             <h3 className="text-lg font-semibold mb-4">Processing Files</h3>
             <div className="space-y-4">
               {uploadedFiles.map((uploadedFile) => (
-                <div key={uploadedFile.id} className="flex items-center gap-4 p-4 border rounded-lg">
+                <div
+                  key={uploadedFile.id}
+                  className="flex items-center gap-4 p-4 border rounded-lg"
+                >
                   <FileAudio className="w-8 h-8 text-primary flex-shrink-0" />
 
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium truncate">{uploadedFile.file.name}</p>
+                    <p className="font-medium truncate">
+                      {uploadedFile.file.name}
+                    </p>
                     <p className="text-sm text-muted-foreground">
                       {(uploadedFile.file.size / (1024 * 1024)).toFixed(2)} MB
                     </p>
@@ -142,11 +156,14 @@ export function UploadSection() {
                       <div className="flex items-center justify-between text-sm mb-1">
                         <span className="capitalize text-muted-foreground">
                           {uploadedFile.status === "uploading" && "Uploading..."}
-                          {uploadedFile.status === "processing" && "Converting to stereo..."}
+                          {uploadedFile.status === "processing" &&
+                            "Converting to stereo..."}
                           {uploadedFile.status === "completed" && "Completed"}
                           {uploadedFile.status === "error" && "Error"}
                         </span>
-                        <span className="text-muted-foreground">{uploadedFile.progress}%</span>
+                        <span className="text-muted-foreground">
+                          {uploadedFile.progress}%
+                        </span>
                       </div>
                       <Progress value={uploadedFile.progress} className="h-2" />
                     </div>
@@ -163,8 +180,14 @@ export function UploadSection() {
                         </Button>
                       </>
                     )}
-                    {uploadedFile.status === "error" && <AlertCircle className="w-5 h-5 text-red-500" />}
-                    <Button variant="ghost" size="sm" onClick={() => removeFile(uploadedFile.id)}>
+                    {uploadedFile.status === "error" && (
+                      <AlertCircle className="w-5 h-5 text-red-500" />
+                    )}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removeFile(uploadedFile.id)}
+                    >
                       <X className="w-4 h-4" />
                     </Button>
                   </div>
