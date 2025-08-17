@@ -10,6 +10,7 @@ interface AnimatedSectionProps extends HTMLAttributes<HTMLDivElement> {
 
 export function AnimatedSection({ children, className, delay = 0, ...props }: AnimatedSectionProps) {
   return (
+    // @ts-ignore
     <motion.div
       initial={{ opacity: 0, y: 20, scale: 0.98 }}
       whileInView={{ opacity: 1, y: 0, scale: 1 }}

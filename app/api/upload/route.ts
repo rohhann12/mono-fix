@@ -1,9 +1,9 @@
 import { NextResponse, NextRequest } from "next/server";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
-import { r2 } from "@/lib/r2";
+import { r2 } from "../../../lib/r2";
 import { auth } from "@clerk/nextjs/server";
-import { redis } from "@/lib/redis";
-import { prisma } from "@/lib/prisma"; 
+import { redis } from "../../../lib/redis";
+import { prisma } from "../../../lib/prisma"; 
 
 export async function POST(req: NextRequest) {
   try {

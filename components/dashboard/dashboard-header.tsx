@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "../../components/ui/button";
 import { Volume2, User, Settings, LogOut } from "lucide-react";
 import Link from "next/link";
 import {
@@ -8,7 +8,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "../../components/ui/dropdown-menu";
 import { useClerk } from "@clerk/nextjs";
 
 export function DashboardHeader() {
